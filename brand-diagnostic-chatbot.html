@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Why My Brand Isn't Selling — Hueblend</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0D0D0F;
+    --surface: #161618;
+    --surface2: #1E1E21;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,255,255,0.15);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.45);
+    --accent: #E8845A;
+    --accent2: #C9B99A;
+    --user-bubble: #1C1C20;
+    --ai-bubble: #191918;
+    --tag-bg: rgba(232,132,90,0.12);
+    --tag-text: #E8845A;
+  }
+
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+  .logo-text { font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .header-badge {
+    font-size: 11px; padding: 4px 12px; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.04em;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 56px 24px 36px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--tag-text); background: var(--tag-bg);
+    padding: 5px 14px; border-radius: 99px; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 440px; margin: 0 auto; }
+
+  /* CHAT */
+  .chat-wrap {
+    flex: 1;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 16px 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .message { display: flex; gap: 12px; padding: 10px 0; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; margin-top: 2px;
+  }
+  .avatar.ai { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 10px; letter-spacing: 0.05em; }
+  .avatar.user { background: var(--accent); color: #fff; }
+
+  .bubble {
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.7;
+  }
+  .bubble.ai {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 14px 14px 14px;
+    color: var(--text);
+  }
+  .bubble.user {
+    background: var(--user-bubble);
+    border: 1px solid var(--border-active);
+    border-radius: 14px 4px 14px 14px;
+    color: var(--text);
+  }
+
+  .bubble h3 {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 8px;
+  }
+  .bubble ul { padding-left: 18px; }
+  .bubble ul li { margin-bottom: 5px; }
+  .bubble strong { color: var(--text); font-weight: 600; }
+  .bubble hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  .bubble .diagnosis-label {
+    font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 4px; font-weight: 600;
+  }
+  .bubble .action-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .bubble .action-item:last-child { border-bottom: none; }
+  .action-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--tag-bg); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* TYPING */
+  .typing { display: flex; gap: 5px; align-items: center; padding: 8px 0; }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted); animation: blink 1.2s ease infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+  /* INPUT */
+  .input-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    padding: 16px;
+  }
+  .input-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; gap: 10px; align-items: flex-end;
+    background: var(--surface); border: 1px solid var(--border-active);
+    border-radius: 14px; padding: 10px 14px;
+    transition: border-color 0.2s;
+  }
+  .input-inner:focus-within { border-color: rgba(232,132,90,0.4); }
+  textarea {
+    flex: 1; background: none; border: none; outline: none; resize: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px; line-height: 1.5; max-height: 120px;
+    overflow-y: auto; min-height: 22px;
+  }
+  textarea::placeholder { color: var(--muted); }
+  .send-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity 0.2s, transform 0.15s;
+    color: white;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:active { transform: scale(0.94); }
+  .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .send-btn svg { width: 15px; height: 15px; }
+
+  /* QUICK REPLIES */
+  .quick-replies { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 0 0 44px; }
+  .qr-btn {
+    font-size: 12.5px; padding: 6px 14px; border-radius: 99px;
+    border: 1px solid var(--border-active); background: none;
+    color: var(--muted); cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .qr-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--accent); }
+
+  /* DISCLAIMER */
+  .disclaimer { text-align: center; font-size: 11px; color: var(--muted); padding-top: 6px; max-width: 720px; margin: 0 auto; }
+
+  .bubble .intel-block { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+  .bubble .intel-row { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.65; }
+  .intel-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 6px; flex-shrink: 0;
+    margin-top: 2px; font-family: 'DM Sans', sans-serif;
+  }
+  .intel-tag.eq { background: rgba(92,201,138,0.15); color: #5CC98A; }
+  .intel-tag.iq { background: rgba(90,148,232,0.15); color: #5A94E8; }
+  .intel-tag.cq { background: rgba(201,185,154,0.15); color: #C9B99A; }
+
+  /* LEAD CAPTURE CARD */
+  .lead-card {
+    background: var(--surface);
+    border: 1px solid rgba(232,132,90,0.25);
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin: 8px 0 8px 44px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .lead-card-title {
+    font-size: 13px; font-weight: 600; color: var(--accent);
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .lead-card-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+  .lead-fields { display: flex; flex-direction: column; gap: 10px; }
+  .lead-input {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border-active);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .lead-input:focus { border-color: rgba(232,132,90,0.5); }
+  .lead-input::placeholder { color: var(--muted); }
+  .lead-submit {
+    width: 100%; padding: 11px; border-radius: 10px;
+    background: var(--accent); border: none; cursor: pointer;
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; margin-top: 4px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .lead-submit:hover { opacity: 0.88; }
+  .lead-submit:active { transform: scale(0.98); }
+  .lead-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+  .lead-success {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13.5px; color: var(--muted); padding: 6px 0;
+  }
+  .lead-success-dot { width: 8px; height: 8px; border-radius: 50%; background: #5CC98A; flex-shrink: 0; }
+  .lead-skip { text-align: center; margin-top: 10px; }
+  .lead-skip button {
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--muted);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .lead-skip button:hover { color: var(--text); }
+
+  /* PAYMENT WALL */
+  .pay-wall {
+    background: var(--surface);
+    border: 1px solid rgba(232,132,90,0.3);
+    border-radius: 16px;
+    padding: 22px;
+    margin: 8px 0 8px 44px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .pay-wall-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px; display: block;
+  }
+  .pay-wall h3 {
+    font-family: 'Instrument Serif', serif; font-size: 20px; font-weight: 400;
+    color: var(--text); margin-bottom: 6px; line-height: 1.3;
+  }
+  .pay-wall p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  .pay-what-you-get {
+    display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px;
+  }
+  .pay-feature {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 13px; color: var(--muted);
+  }
+  .pay-feature-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #5CC98A; flex-shrink: 0;
+  }
+  .pay-price-row {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px;
+  }
+  .pay-price {
+    font-size: 28px; font-weight: 600; color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pay-price-sub { font-size: 12px; color: var(--muted); }
+  .pay-btn {
+    width: 100%; padding: 13px; border-radius: 10px;
+    background: var(--accent); border: none; cursor: pointer;
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 600; letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .pay-btn:hover { opacity: 0.88; }
+  .pay-btn:active { transform: scale(0.98); }
+  .pay-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pay-secure {
+    text-align: center; font-size: 11px; color: var(--muted);
+    margin-top: 10px; display: flex; align-items: center;
+    justify-content: center; gap: 5px;
+  }
+  .pay-secure-icon { font-size: 11px; }
+  .pay-skip { text-align: center; margin-top: 8px; }
+  .pay-skip button {
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--muted);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .pay-skip button:hover { color: var(--text); }
+  .pay-success {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13.5px; color: var(--muted); padding: 6px 0;
+  }
+  .pay-success-dot { width: 8px; height: 8px; border-radius: 50%; background: #5CC98A; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">Hueblend</span>
+  </div>
+  <span class="header-badge">Brand Diagnostic</span>
+</header>
+
+<div class="hero" id="hero">
+  <div class="hero-tag">Free Diagnostic Tool</div>
+  <h1>Why isn't your brand <em>selling?</em></h1>
+  <p>Describe your brand and what's not working. Get a clear diagnosis — and an exact next step — in under 3 minutes.</p>
+</div>
+
+<div class="chat-wrap" id="chatWrap"></div>
+
+<div class="input-bar">
+  <div class="disclaimer" id="disclaimer" style="display:none">Powered by Hueblend AI · For a full strategy session, <a href="#" style="color:var(--accent);text-decoration:none">book a call</a></div>
+  <div class="input-inner">
+    <textarea id="msgInput" placeholder="Tell me about your brand — what do you sell and what's the problem?" rows="1"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────
+const SHEET_WEBHOOK_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+
+// ─── USER MEMORY (like ChatGPT) ─────────────────────────
+const MEMORY_KEY = 'hueblend_user';
+function saveUserMemory(data) {
+  try {
+    const existing = getUserMemory() || {};
+    const updated = { ...existing, ...data, lastVisit: new Date().toISOString() };
+    if (!updated.firstVisit) updated.firstVisit = new Date().toISOString();
+    if (!updated.sessions) updated.sessions = 0;
+    updated.sessions++;
+    if (!updated.diagnoses) updated.diagnoses = [];
+    localStorage.setItem(MEMORY_KEY, JSON.stringify(updated));
+  } catch(e) {}
+}
+function getUserMemory() {
+  try { const r = localStorage.getItem(MEMORY_KEY); return r ? JSON.parse(r) : null; }
+  catch(e) { return null; }
+}
+function saveDiagnosis(meta, transcript) {
+  try {
+    const mem = getUserMemory() || {};
+    if (!mem.diagnoses) mem.diagnoses = [];
+    mem.diagnoses.unshift({ date: new Date().toISOString(), ...meta, transcript });
+    mem.diagnoses = mem.diagnoses.slice(0, 10);
+    localStorage.setItem(MEMORY_KEY, JSON.stringify(mem));
+  } catch(e) {}
+}
+// ────────────────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are the Hueblend Advisor — a high-level marketing strategist inspired by David Ogilvy's depth of consumer understanding and modern digital agencies like Schbang's execution-first thinking.
+
+You are not a chatbot. You are a mentor, a strategist, and a partner.
+
+═══ YOUR 4-INTELLIGENCE FRAMEWORK ═══
+
+1. EQ — Emotional Intelligence (ALWAYS lead with this)
+   - Acknowledge the user's frustration or effort before diagnosing
+   - Never sound robotic or clinical
+   - Make them feel genuinely understood
+   - Example: "I hear you — and honestly, what you're describing is one of the most common yet misunderstood problems in digital marketing."
+
+2. IQ — Strategic Intelligence (Diagnose the real problem)
+   - Identify the ROOT cause, not the symptom
+   - Think in funnels: awareness → interest → desire → action
+   - Separate what LOOKS like the problem from what IS the problem
+   - Example: "Your issue isn't reach — it's conversion. Your content attracts attention but lacks intent-driven messaging."
+
+3. CQ — Cultural Intelligence (Be platform-aware and modern)
+   - Understand how Instagram, Reels, Meta Ads, WhatsApp commerce actually work TODAY
+   - Reference real platform behaviour, algorithm logic, audience psychology
+   - Speak the language of D2C, founders, digital-first brands
+   - Example: "Reels without a hook in the first 1.5 seconds lose 70% of viewers before your product even appears."
+
+4. SQ — Strategic Execution (Always end with clear action)
+   - Every response must answer: "What do I do next?"
+   - Steps must be specific, sequenced, and immediately executable
+   - Never give more than 3 action steps per message
+   - Example: "This week: 1) Rewrite your bio CTA, 2) Post one problem-hook Reel, 3) Add a pinned story with a direct purchase link."
+
+═══ CONVERSATION FLOW ═══
+
+Messages 1–2 (Gather context):
+- Ask ONE focused question at a time
+- Open warmly, acknowledge their situation
+- Understand: what they sell, who their customer is, what they've tried
+
+Messages 3–4 (Probe deeper):
+- Ask about their funnel: where are people dropping off?
+- Ask about content: what kind, what platform, what response
+- Ask about trust signals, pricing, ad spend if relevant
+
+Message 5+ (Deliver diagnosis):
+Use EXACTLY this HTML format:
+
+<div class="diagnosis-label">Root problem identified</div>
+<strong>[Core issue in 6–8 words — sharp, specific, non-generic]</strong>
+<hr/>
+<div class="intel-block">
+<div class="intel-row"><span class="intel-tag eq">EQ</span><span>[1–2 sentences validating their effort and frustration — warm, specific to their situation]</span></div>
+<div class="intel-row"><span class="intel-tag iq">IQ</span><span>[2–3 sentences diagnosing the real strategic root cause — funnel thinking, positioning, intent gap]</span></div>
+<div class="intel-row"><span class="intel-tag cq">CQ</span><span>[1–2 sentences on platform/cultural context — why this problem exists in today's digital landscape]</span></div>
+</div>
+<hr/>
+<strong>Your next moves:</strong>
+<div class="action-item"><div class="action-num">1</div><div>[Specific, executable action — what exactly to do, on which platform, in what format]</div></div>
+<div class="action-item"><div class="action-num">2</div><div>[Specific, executable action]</div></div>
+<div class="action-item"><div class="action-num">3</div><div>[Specific, executable action]</div></div>
+<hr/>
+<em style="color:var(--muted);font-size:13px" data-cta="book-session">Want Hueblend to execute this for you? Book a strategy call →</em>
+
+<!--META{"brandType":"...","problemCategory":"...","diagnosisSummary":"..."}META-->
+
+═══ ABSOLUTE RULES ═══
+✗ Never say "post consistently" or any other vague advice
+✗ Never give more than 3 action steps
+✗ Never sound robotic, templated, or clinical
+✗ Never ignore what the user specifically said
+✗ Never start a diagnosis without enough context — ask more if needed
+✓ Always be specific to THEIR brand, not a generic brand
+✓ Always combine empathy + strategy + culture + action
+✓ Speak like a senior strategist, not a content calendar tool`;
+
+let history = [];
+let isTyping = false;
+let diagnosisDelivered = false;
+let sessionMeta = { brandType: '', problemCategory: '', diagnosisSummary: '' };
+let ctaClicked = 'none';
+
+const chatWrap = document.getElementById('chatWrap');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const hero = document.getElementById('hero');
+const disclaimer = document.getElementById('disclaimer');
+
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+});
+
+function extractMeta(text) {
+  const match = text.match(/<!--META(\{.*?\})META-->/s);
+  if (match) {
+    try { return JSON.parse(match[1]); } catch(e) {}
+  }
+  return null;
+}
+
+function stripMeta(text) {
+  return text.replace(/<!--META\{.*?\}META-->/s, '').trim();
+}
+
+function addMessage(role, content, quickReplies = []) {
+  const wrap = document.createElement('div');
+  wrap.className = `message ${role}`;
+
+  const av = document.createElement('div');
+  av.className = `avatar ${role}`;
+  av.textContent = role === 'ai' ? 'HB' : 'You';
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role}`;
+  bubble.innerHTML = content;
+
+  // Track CTA clicks inside bubbles
+  bubble.querySelectorAll('[data-cta]').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', () => {
+      ctaClicked = el.dataset.cta;
+    });
+  });
+
+  if (role === 'ai') { wrap.appendChild(av); wrap.appendChild(bubble); }
+  else { wrap.appendChild(bubble); wrap.appendChild(av); }
+
+  chatWrap.appendChild(wrap);
+
+  if (quickReplies.length > 0) {
+    const qrWrap = document.createElement('div');
+    qrWrap.className = 'quick-replies';
+    quickReplies.forEach(qr => {
+      const btn = document.createElement('button');
+      btn.className = 'qr-btn'; btn.textContent = qr;
+      btn.onclick = () => { msgInput.value = qr; sendMessage(); qrWrap.remove(); };
+      qrWrap.appendChild(btn);
+    });
+    chatWrap.appendChild(qrWrap);
+  }
+
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+  return bubble;
+}
+
+function showLeadCapture() {
+  const card = document.createElement('div');
+  card.className = 'lead-card';
+  card.id = 'leadCard';
+  card.innerHTML = `
+    <div class="lead-card-title">Get your full report</div>
+    <div class="lead-card-sub">Enter your details to save this diagnosis and unlock next steps from Hueblend.</div>
+    <div class="lead-fields">
+      <input class="lead-input" id="leadName" placeholder="Your name" type="text" autocomplete="name" />
+      <input class="lead-input" id="leadEmail" placeholder="Your email address" type="email" autocomplete="email" />
+      <button class="lead-submit" id="leadSubmit" onclick="submitLead()">Send me my diagnosis report</button>
+    </div>
+    <div class="lead-skip"><button onclick="skipLead()">Skip for now</button></div>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;">Your data is stored securely and never sold or shared.<br/>By continuing you agree to our <a href="privacy.html" target="_blank" style="color:var(--accent);text-decoration:none;">Privacy Policy</a> &amp; <a href="terms.html" target="_blank" style="color:var(--accent);text-decoration:none;">Terms of Use</a>.</p>
+  `;
+  chatWrap.appendChild(card);
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+
+async function submitLead() {
+  const name = document.getElementById('leadName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  if (!name || !email || !email.includes('@')) {
+    document.getElementById('leadEmail').style.borderColor = 'rgba(232,90,90,0.6)';
+    return;
+  }
+
+  document.getElementById('leadSubmit').disabled = true;
+  document.getElementById('leadSubmit').textContent = 'Saving...';
+
+  const transcript = history.map(m =>
+    `[${m.role.toUpperCase()}]: ${m.content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()}`
+  ).join('\n\n');
+
+  await logToSheet({ name, email, transcript, ctaClicked, ...sessionMeta });
+  saveUserMemory({ name, email });
+
+  document.getElementById('leadCard').innerHTML = `
+    <div class="lead-success">
+      <div class="lead-success-dot"></div>
+      <span>Saved! Check your inbox — your diagnosis report is on its way.</span>
+    </div>`;
+
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+
+function skipLead() {
+  const card = document.getElementById('leadCard');
+  if (card) {
+    logToSheet({ name: '(skipped)', email: '(skipped)', transcript: history.map(m => `[${m.role.toUpperCase()}]: ${m.content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()}`).join('\n\n'), ctaClicked, ...sessionMeta });
+    card.remove();
+  }
+}
+
+async function logToSheet(data) {
+  if (!SHEET_WEBHOOK_URL || SHEET_WEBHOOK_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    console.log('📊 Data to log (sheet not connected yet):', data);
+    return;
+  }
+  try {
+    await fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, timestamp: new Date().toISOString() })
+    });
+  } catch(e) { console.error('Sheet log failed:', e); }
+}
+
+function showTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'message ai'; wrap.id = 'typing-wrap';
+  const av = document.createElement('div');
+  av.className = 'avatar ai'; av.textContent = 'HB';
+  const dot = document.createElement('div');
+  dot.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  wrap.appendChild(av); wrap.appendChild(dot);
+  chatWrap.appendChild(wrap);
+  chatWrap.scrollTop = chatWrap.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-wrap');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text || isTyping) return;
+
+  if (history.length === 0) {
+    hero.style.display = 'none';
+    disclaimer.style.display = 'block';
+  }
+
+  addMessage('user', text);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  history.push({ role: 'user', content: text });
+
+  isTyping = true; sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+
+    const data = await response.json();
+    let reply = data.content?.map(b => b.text || '').join('') || 'Something went wrong. Try again.';
+
+    // Extract metadata if diagnosis
+    const meta = extractMeta(reply);
+    if (meta) {
+      sessionMeta = meta;
+      diagnosisDelivered = true;
+      reply = stripMeta(reply);
+      const tx = history.map(m => `[${m.role.toUpperCase()}]: ${m.content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()}`).join('\n\n');
+      saveDiagnosis(meta, tx);
+    }
+
+    removeTyping();
+    history.push({ role: 'assistant', content: reply });
+
+    const isFirstMessage = history.length <= 2;
+    const quickReplies = isFirstMessage ? [
+      "Fashion brand, getting views but no sales",
+      "Beauty D2C, running ads but low ROI",
+      "Lifestyle brand, growing followers but zero revenue"
+    ] : [];
+
+    addMessage('ai', reply, quickReplies);
+
+    if (diagnosisDelivered) {
+      setTimeout(showLeadCapture, 600);
+      diagnosisDelivered = false;
+    }
+
+  } catch (err) {
+    removeTyping();
+    addMessage('ai', 'Something went wrong connecting to the advisor. Please refresh and try again.');
+  }
+
+  isTyping = false; sendBtn.disabled = false;
+  msgInput.focus();
+}
+
+setTimeout(() => {
+  const mem = getUserMemory();
+  saveUserMemory({});
+
+  if (mem && mem.name && mem.diagnoses && mem.diagnoses.length > 0) {
+    const last = mem.diagnoses[0];
+    const daysAgo = Math.floor((Date.now() - new Date(last.date)) / 86400000);
+    const when = daysAgo === 0 ? 'earlier today' : daysAgo === 1 ? 'yesterday' : `${daysAgo} days ago`;
+    addMessage('ai',
+      `Welcome back, <strong>${mem.name}</strong>! Great to see you again.<br/><br/>
+      ${when}, we identified that your core issue was: <em>${last.diagnosisSummary}</em>.<br/><br/>
+      Has anything changed since then — or are you facing a new challenge today?`,
+      ["Yes, things have improved — new problem now", "Still working on the same issue", "Start a fresh diagnosis"]
+    );
+  } else {
+    addMessage('ai',
+      `Hey! Welcome to the Hueblend Brand Diagnostic.<br/><br/>
+      I'm here to help you figure out exactly what's holding your brand back — not with generic advice, but with a real diagnosis specific to <em>your</em> situation.<br/><br/>
+      To start: <strong>what does your brand sell, and who is your ideal customer?</strong>`,
+      [
+        "Fashion brand, getting views but no sales",
+        "Beauty D2C, running ads but low ROI",
+        "Lifestyle brand, growing followers but zero revenue"
+      ]
+    );
+  }
+}, 400);
+</script>
+</body>
+</html>
