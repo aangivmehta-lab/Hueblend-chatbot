@@ -5,236 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Why My Brand Isn't Selling — Hueblend</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<script src="https://checkout.razorpay.com/v1/checkout.js">
-// ─── FEEDBACK BUTTONS ─────────────────────────────────────
-function addFeedback(messageIndex) {
-  const wrap = document.createElement('div');
-  wrap.className = 'feedback-row';
-  wrap.id = `feedback-${messageIndex}`;
-  wrap.innerHTML = `
-    <span class="feedback-label">Was this helpful?</span>
-    <button class="feedback-btn" id="up-${messageIndex}" onclick="submitFeedback(${messageIndex}, 'helpful')">👍</button>
-    <button class="feedback-btn" id="down-${messageIndex}" onclick="submitFeedback(${messageIndex}, 'not helpful')">👎</button>
-    <span class="feedback-thanks" id="thanks-${messageIndex}">Thanks for the feedback!</span>
-  `;
-  chatWrap.appendChild(wrap);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-function submitFeedback(index, rating) {
-  const upBtn = document.getElementById(`up-${index}`);
-  const downBtn = document.getElementById(`down-${index}`);
-  const thanks = document.getElementById(`thanks-${index}`);
-  if (!upBtn || upBtn.dataset.voted) return;
-
-  upBtn.dataset.voted = 'true';
-  downBtn.dataset.voted = 'true';
-
-  if (rating === 'helpful') {
-    upBtn.classList.add('active-up');
-  } else {
-    downBtn.classList.add('active-down');
-  }
-
-  thanks.style.display = 'inline';
-
-  // Log feedback to sheet
-  const msgContent = history[index] ? history[index].content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 300) : '';
-  logToSheet({
-    name: '[FEEDBACK]',
-    email: rating,
-    brandType: sessionMeta.brandType || '',
-    problemCategory: sessionMeta.problemCategory || '',
-    diagnosisSummary: sessionMeta.diagnosisSummary || '',
-    ctaClicked: `feedback-${rating}`,
-    transcript: `Message: ${msgContent}`
-  });
-}
-// ──────────────────────────────────────────────────────────
-
-// ─── BOOK A CALL FORM ─────────────────────────────────────
-function showBookCallForm() {
-  if (document.getElementById('callCard')) return;
-  const card = document.createElement('div');
-  card.className = 'call-card';
-  card.id = 'callCard';
-  card.innerHTML = `
-    <div class="call-card-title">Book a strategy call</div>
-    <div class="call-card-sub">Tell us a bit about your brand and we'll reach out to schedule a call with the Hueblend team.</div>
-    <div class="call-fields">
-      <input class="call-input" id="callName" placeholder="Your name" type="text" autocomplete="name" />
-      <input class="call-input" id="callEmail" placeholder="Your email address" type="email" autocomplete="email" />
-      <input class="call-input" id="callBrand" placeholder="Your brand name" type="text" />
-      <select class="call-select" id="callTime">
-        <option value="" disabled selected>Best time to call</option>
-        <option value="Morning (9am–12pm)">Morning (9am–12pm)</option>
-        <option value="Afternoon (12pm–4pm)">Afternoon (12pm–4pm)</option>
-        <option value="Evening (4pm–8pm)">Evening (4pm–8pm)</option>
-      </select>
-      <textarea class="call-textarea" id="callChallenge" placeholder="Briefly describe your biggest marketing challenge..."></textarea>
-      <button class="call-submit" id="callSubmit" onclick="submitCallForm()">Request a call from Hueblend</button>
-    </div>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;">We'll reach out within 24 hours. Your details are never shared.</p>
-  `;
-  chatWrap.appendChild(card);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
-async function submitCallForm() {
-  const name = document.getElementById('callName').value.trim();
-  const email = document.getElementById('callEmail').value.trim();
-  const brand = document.getElementById('callBrand').value.trim();
-  const time = document.getElementById('callTime').value;
-  const challenge = document.getElementById('callChallenge').value.trim();
-
-  if (!name || !email || !email.includes('@') || !brand) {
-    document.getElementById('callEmail').style.borderColor = 'rgba(232,90,90,0.6)';
-    return;
-  }
-
-  document.getElementById('callSubmit').disabled = true;
-  document.getElementById('callSubmit').textContent = 'Sending...';
-
-  await logToSheet({
-    name,
-    email,
-    brandType: brand,
-    problemCategory: time,
-    diagnosisSummary: challenge,
-    ctaClicked: 'book-call-form',
-    transcript: `Brand: ${brand} | Time: ${time} | Challenge: ${challenge}`
-  });
-
-  saveUserMemory({ name, email });
-
-  document.getElementById('callCard').innerHTML = `
-    <div class="call-success">
-      <div class="call-success-dot"></div>
-      <span>Done! The Hueblend team will reach out to you within 24 hours.</span>
-    </div>`;
-
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-// ──────────────────────────────────────────────────────────
-
-
-// ─── FEEDBACK BUTTONS ────────────────────────────────────
-let feedbackCount = 0;
-
-function addFeedbackButtons(messageIndex, messageText) {
-  const row = document.createElement('div');
-  row.className = 'feedback-row';
-  row.id = `fb-${messageIndex}`;
-  row.innerHTML = `
-    <span class="feedback-label">Helpful?</span>
-    <button class="fb-btn" id="fb-up-${messageIndex}" onclick="submitFeedback(${messageIndex}, 'up', \`${messageText.replace(/`/g, "'").replace(/
-/g, ' ').slice(0, 100)}\`)">👍</button>
-    <button class="fb-btn" id="fb-down-${messageIndex}" onclick="submitFeedback(${messageIndex}, 'down', \`${messageText.replace(/`/g, "'").replace(/
-/g, ' ').slice(0, 100)}\`)">👎</button>
-  `;
-  chatWrap.appendChild(row);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
-function submitFeedback(index, type, messageText) {
-  const upBtn = document.getElementById(`fb-up-${index}`);
-  const downBtn = document.getElementById(`fb-down-${index}`);
-  if (!upBtn || !downBtn) return;
-
-  upBtn.classList.remove('active-up');
-  downBtn.classList.remove('active-down');
-
-  if (type === 'up') upBtn.classList.add('active-up');
-  else downBtn.classList.add('active-down');
-
-  upBtn.disabled = true; downBtn.disabled = true;
-
-  // Log to sheet
-  logToSheet({
-    name: '(feedback)',
-    email: '(feedback)',
-    brandType: sessionMeta.brandType || 'unknown',
-    problemCategory: sessionMeta.problemCategory || 'unknown',
-    diagnosisSummary: `FEEDBACK_${type.toUpperCase()}: ${messageText}`,
-    ctaClicked: type === 'up' ? 'thumbs_up' : 'thumbs_down',
-    transcript: messageText
-  });
-
-  // Show thanks
-  const row = document.getElementById(`fb-${index}`);
-  if (row) {
-    setTimeout(() => {
-      row.innerHTML = `<span class="fb-thanks">${type === 'up' ? 'Thanks! Glad that helped.' : 'Thanks for the feedback — we will improve.'}</span>`;
-    }, 400);
-  }
-}
-// ─────────────────────────────────────────────────────────
-
-// ─── BOOK A CALL FORM ─────────────────────────────────────
-function showBookCallForm() {
-  const overlay = document.createElement('div');
-  overlay.className = 'call-form-overlay';
-  overlay.id = 'callFormOverlay';
-  overlay.innerHTML = `
-    <div class="call-form-card">
-      <button class="call-close" onclick="closeCallForm()">×</button>
-      <div class="call-form-title">Book a strategy call</div>
-      <div class="call-form-sub">Tell us about your brand and we will reach out to schedule a call with the Hueblend team.</div>
-      <div class="call-form-fields">
-        <input class="call-input" id="callName" placeholder="Your name" type="text" />
-        <input class="call-input" id="callEmail" placeholder="Your email address" type="email" />
-        <input class="call-input" id="callBrand" placeholder="Your brand name" type="text" />
-        <input class="call-input" id="callTime" placeholder="Best time to call (e.g. weekdays 3–6pm)" type="text" />
-        <input class="call-input" id="callNeed" placeholder="What do you need help with?" type="text" />
-        <button class="call-submit" id="callSubmitBtn" onclick="submitCallForm()">Request a call →</button>
-      </div>
-      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;">We will get back to you within 24 hours. Your info is never shared.</p>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-}
-
-function closeCallForm() {
-  const overlay = document.getElementById('callFormOverlay');
-  if (overlay) overlay.remove();
-}
-
-async function submitCallForm() {
-  const name = document.getElementById('callName').value.trim();
-  const email = document.getElementById('callEmail').value.trim();
-  const brand = document.getElementById('callBrand').value.trim();
-  const time = document.getElementById('callTime').value.trim();
-  const need = document.getElementById('callNeed').value.trim();
-
-  if (!name || !email || !email.includes('@')) {
-    document.getElementById('callEmail').style.borderColor = 'rgba(232,90,90,0.6)';
-    return;
-  }
-
-  document.getElementById('callSubmitBtn').disabled = true;
-  document.getElementById('callSubmitBtn').textContent = 'Sending...';
-
-  await logToSheet({
-    name, email,
-    brandType: brand,
-    problemCategory: need,
-    diagnosisSummary: 'CALL_REQUEST: ' + need,
-    ctaClicked: 'book-call-form',
-    transcript: `Call request — Brand: ${brand} | Time: ${time} | Need: ${need}`
-  });
-
-  document.getElementById('callFormOverlay').innerHTML = `
-    <div class="call-form-card" style="text-align:center;padding:40px;">
-      <div style="font-size:32px;margin-bottom:16px;">✓</div>
-      <div class="call-form-title">Request received!</div>
-      <div class="call-form-sub" style="margin-top:8px;">We will reach out within 24 hours to schedule your call.</div>
-      <button class="call-submit" style="margin-top:20px;width:auto;padding:10px 28px;" onclick="closeCallForm()">Done</button>
-    </div>
-  `;
-}
-// ─────────────────────────────────────────────────────────
-
-</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -434,31 +206,6 @@ async function submitCallForm() {
   .intel-tag.iq { background: rgba(90,148,232,0.15); color: #5A94E8; }
   .intel-tag.cq { background: rgba(201,185,154,0.15); color: #C9B99A; }
 
-  /* FEEDBACK BUTTONS */
-  .feedback-row { display: flex; align-items: center; gap: 8px; padding: 6px 0 0 44px; }
-  .feedback-label { font-size: 11px; color: var(--muted); }
-  .fb-btn {
-    width: 30px; height: 30px; border-radius: 50%;
-    border: 1px solid var(--border-active); background: none;
-    cursor: pointer; font-size: 14px; display: flex; align-items: center;
-    justify-content: center; transition: all 0.15s; color: var(--muted);
-  }
-  .fb-btn:hover { background: var(--surface2); border-color: var(--accent); }
-  .fb-btn.active-up { background: rgba(92,201,138,0.15); border-color: #5CC98A; }
-  .fb-btn.active-down { background: rgba(226,75,74,0.15); border-color: #E24B4A; }
-
-  /* CALL BUTTON */
-  .call-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--accent); color: #fff;
-    padding: 10px 18px; border-radius: 10px;
-    font-size: 13.5px; font-weight: 500; text-decoration: none;
-    margin-top: 10px; transition: opacity 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .call-btn:hover { opacity: 0.88; }
-  .call-btn svg { width: 14px; height: 14px; }
-
   /* LEAD CAPTURE CARD */
   .lead-card {
     background: var(--surface);
@@ -570,162 +317,6 @@ async function submitCallForm() {
     font-size: 13.5px; color: var(--muted); padding: 6px 0;
   }
   .pay-success-dot { width: 8px; height: 8px; border-radius: 50%; background: #5CC98A; flex-shrink: 0; }
-
-  /* FEEDBACK BUTTONS */
-  .feedback-row { display: flex; align-items: center; gap: 8px; padding: 6px 0 0 44px; animation: fadeUp 0.3s ease both; }
-  .feedback-label { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
-  .feedback-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-active); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; color: var(--muted); }
-  .feedback-btn:hover { background: var(--surface2); border-color: var(--accent); }
-  .feedback-btn.active-up { background: rgba(92,201,138,0.15); border-color: #5CC98A; }
-  .feedback-btn.active-down { background: rgba(226,75,74,0.15); border-color: #E24B4A; }
-  .feedback-thanks { font-size: 11px; color: var(--muted); padding-left: 4px; display: none; }
-
-  /* BOOK A CALL FORM */
-  .call-card { background: var(--surface); border: 1px solid rgba(232,132,90,0.3); border-radius: 16px; padding: 22px 24px; margin: 8px 0 8px 44px; animation: fadeUp 0.4s ease both; }
-  .call-card-title { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
-  .call-card-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
-  .call-fields { display: flex; flex-direction: column; gap: 10px; }
-  .call-input { width: 100%; padding: 10px 14px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border-active); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .call-input:focus { border-color: rgba(232,132,90,0.5); }
-  .call-input::placeholder { color: var(--muted); }
-  .call-select { width: 100%; padding: 10px 14px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border-active); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; appearance: none; cursor: pointer; }
-  .call-select option { background: var(--surface2); color: var(--text); }
-  .call-textarea { width: 100%; padding: 10px 14px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border-active); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; resize: none; min-height: 80px; line-height: 1.5; transition: border-color 0.2s; }
-  .call-textarea:focus { border-color: rgba(232,132,90,0.5); }
-  .call-textarea::placeholder { color: var(--muted); }
-  .call-submit { width: 100%; padding: 11px; border-radius: 10px; background: var(--accent); border: none; cursor: pointer; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; margin-top: 4px; transition: opacity 0.2s, transform 0.15s; }
-  .call-submit:hover { opacity: 0.88; }
-  .call-submit:active { transform: scale(0.98); }
-  .call-submit:disabled { opacity: 0.45; cursor: not-allowed; }
-  .call-success { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--muted); padding: 6px 0; }
-  .call-success-dot { width: 8px; height: 8px; border-radius: 50%; background: #5CC98A; flex-shrink: 0; }
-
-  /* FEEDBACK BUTTONS */
-  .feedback-row { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 44px; }
-  .feedback-label { font-size: 11px; color: var(--muted); }
-  .fb-btn {
-    width: 28px; height: 28px; border-radius: 50%;
-    border: 1px solid var(--border-active); background: none;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 13px; transition: all 0.15s; color: var(--muted);
-  }
-  .fb-btn:hover { background: var(--surface2); border-color: var(--accent); }
-  .fb-btn.active-up { background: rgba(92,201,138,0.15); border-color: #5CC98A; }
-  .fb-btn.active-down { background: rgba(226,75,74,0.15); border-color: #E24B4A; }
-  .fb-thanks { font-size: 11px; color: var(--muted); padding-left: 44px; animation: fadeUp 0.3s ease both; }
-
-  /* BOOK A CALL FORM */
-  .call-form-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7); z-index: 100;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px; animation: fadeUp 0.2s ease both;
-  }
-  .call-form-card {
-    background: var(--surface); border: 1px solid rgba(232,132,90,0.3);
-    border-radius: 20px; padding: 28px; width: 100%; max-width: 460px;
-    position: relative;
-  }
-  .call-form-title {
-    font-family: 'Instrument Serif', serif; font-size: 24px; font-weight: 400;
-    margin-bottom: 4px; color: var(--text);
-  }
-  .call-form-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-  .call-form-fields { display: flex; flex-direction: column; gap: 10px; }
-  .call-input {
-    width: 100%; padding: 10px 14px; border-radius: 10px;
-    background: var(--surface2); border: 1px solid var(--border-active);
-    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .call-input:focus { border-color: rgba(232,132,90,0.5); }
-  .call-input::placeholder { color: var(--muted); }
-  .call-submit {
-    width: 100%; padding: 12px; border-radius: 10px;
-    background: var(--accent); border: none; cursor: pointer;
-    color: #fff; font-family: 'DM Sans', sans-serif;
-    font-size: 14px; font-weight: 500; margin-top: 4px;
-    transition: opacity 0.2s;
-  }
-  .call-submit:hover { opacity: 0.88; }
-  .call-submit:disabled { opacity: 0.45; cursor: not-allowed; }
-  .call-close {
-    position: absolute; top: 16px; right: 16px;
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--muted); cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .call-close:hover { color: var(--text); }
-  .book-call-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    margin: 8px 0 8px 44px;
-    padding: 10px 20px; border-radius: 99px;
-    background: var(--accent); border: none; cursor: pointer;
-    color: #fff; font-family: 'DM Sans', sans-serif;
-    font-size: 13.5px; font-weight: 500;
-    transition: opacity 0.2s, transform 0.15s;
-    animation: fadeUp 0.4s ease both;
-  }
-  .book-call-btn:hover { opacity: 0.88; }
-  .book-call-btn:active { transform: scale(0.97); }
-
-
-  /* BOOKING FORM */
-  .booking-card {
-    background: var(--surface);
-    border: 1px solid rgba(232,132,90,0.3);
-    border-radius: 16px;
-    padding: 20px 22px;
-    margin: 8px 0 8px 44px;
-    animation: fadeUp 0.4s ease both;
-  }
-  .booking-title { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
-  .booking-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
-  .booking-fields { display: flex; flex-direction: column; gap: 10px; }
-  .booking-row { display: flex; gap: 10px; }
-  .booking-row .lead-input { flex: 1; }
-  .booking-submit {
-    width: 100%; padding: 11px; border-radius: 10px;
-    background: var(--accent); border: none; cursor: pointer;
-    color: #fff; font-family: 'DM Sans', sans-serif;
-    font-size: 14px; font-weight: 500; margin-top: 4px;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .booking-submit:hover { opacity: 0.88; }
-  .booking-submit:active { transform: scale(0.98); }
-  .booking-submit:disabled { opacity: 0.45; cursor: not-allowed; }
-
-  /* FEEDBACK */
-  .feedback-row {
-    display: flex; align-items: center; gap: 8px;
-    padding: 4px 0 4px 44px;
-    animation: fadeUp 0.3s ease both;
-  }
-  .feedback-label { font-size: 12px; color: var(--muted); }
-  .feedback-btn {
-    background: none; border: 1px solid var(--border);
-    border-radius: 8px; padding: 4px 10px; cursor: pointer;
-    font-size: 14px; transition: all 0.15s;
-  }
-  .feedback-btn:hover { background: var(--surface2); border-color: var(--border-active); }
-  .feedback-btn.active-up { background: rgba(92,201,138,0.15); border-color: #5CC98A; }
-  .feedback-btn.active-down { background: rgba(232,90,90,0.15); border-color: #E85A5A; }
-  .feedback-thanks { font-size: 12px; color: var(--muted); display: none; }
-
-  /* BOOK CALL BUTTON */
-  .book-call-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    margin: 8px 0 8px 44px;
-    padding: 10px 18px; border-radius: 10px;
-    background: rgba(232,132,90,0.12);
-    border: 1px solid rgba(232,132,90,0.3);
-    color: var(--accent); font-size: 13.5px; font-weight: 500;
-    cursor: pointer; font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s; animation: fadeUp 0.4s ease both;
-  }
-  .book-call-btn:hover { background: rgba(232,132,90,0.2); }
-
 </style>
 </head>
 <body>
@@ -848,14 +439,11 @@ Use EXACTLY this HTML format:
 <div class="action-item"><div class="action-num">2</div><div>[Specific, executable action]</div></div>
 <div class="action-item"><div class="action-num">3</div><div>[Specific, executable action]</div></div>
 <hr/>
-<em style="color:var(--muted);font-size:13px" data-cta="book-session">Want Hueblend to execute this for you? Book a strategy call →</em><br/><a href="tel:+919023840113" class="call-btn" data-cta="call-now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 .84h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.74a16 16 0 006.29 6.29l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Call +91 90238 40113</a>
+<em style="color:var(--muted);font-size:13px" data-cta="book-session">Want Hueblend to execute this for you? Book a strategy call →</em>
 
 <!--META{"brandType":"...","problemCategory":"...","diagnosisSummary":"..."}META-->
 
-═══ CONTENT REQUESTS
-If a user asks for hooks, captions, ad copy, reel scripts, content ideas, or any specific content — give it to them immediately, make it excellent and specific to their brand. Then add ONE brief strategic insight at the end explaining why it works. Never redirect a direct content request back to diagnosis. Serve both content requests and diagnosis requests fully.
-
-ABSOLUTE RULES ═══
+═══ ABSOLUTE RULES ═══
 ✗ Never say "post consistently" or any other vague advice
 ✗ Never give more than 3 action steps
 ✗ Never sound robotic, templated, or clinical
@@ -863,7 +451,8 @@ ABSOLUTE RULES ═══
 ✗ Never start a diagnosis without enough context — ask more if needed
 ✓ Always be specific to THEIR brand, not a generic brand
 ✓ Always combine empathy + strategy + culture + action
-✓ Speak like a senior strategist, not a content calendar tool`;
+✓ Speak like a senior strategist, not a content calendar tool`
+;
 
 let history = [];
 let isTyping = false;
@@ -935,41 +524,7 @@ function addMessage(role, content, quickReplies = []) {
   }
 
   chatWrap.scrollTop = chatWrap.scrollHeight;
-
-  // Add feedback buttons after AI messages
-  if (role === 'ai' && content.length > 100) {
-    const fbRow = document.createElement('div');
-    fbRow.className = 'feedback-row';
-    fbRow.innerHTML = `
-      <span class="feedback-label">Helpful?</span>
-      <button class="fb-btn" onclick="submitFeedback(this, 'up')" title="Helpful">👍</button>
-      <button class="fb-btn" onclick="submitFeedback(this, 'down')" title="Not helpful">👎</button>
-    `;
-    chatWrap.appendChild(fbRow);
-  }
-
   return bubble;
-}
-
-function submitFeedback(btn, type) {
-  const row = btn.parentElement;
-  row.querySelectorAll('.fb-btn').forEach(b => b.classList.remove('active-up', 'active-down'));
-  btn.classList.add(type === 'up' ? 'active-up' : 'active-down');
-
-  // Get the last AI message text for context
-  const allBubbles = chatWrap.querySelectorAll('.bubble.ai');
-  const lastMsg = allBubbles[allBubbles.length - 1]?.innerText?.slice(0, 200) || '';
-
-  // Log feedback to sheet
-  logToSheet({
-    name: '(feedback)',
-    email: '(feedback)',
-    brandType: sessionMeta.brandType || 'unknown',
-    problemCategory: sessionMeta.problemCategory || 'unknown',
-    diagnosisSummary: sessionMeta.diagnosisSummary || 'unknown',
-    ctaClicked: `feedback-${type}`,
-    transcript: `FEEDBACK: ${type.toUpperCase()} | Message: ${lastMsg}`
-  });
 }
 
 function showLeadCapture() {
@@ -1076,12 +631,12 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const WORKER_URL = 'PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE';
+    const WORKER_URL = 'https://small-queen-623c.aangivmehta.workers.dev/';
     const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gemini-2.5-flash',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: SYSTEM_PROMPT,
         messages: history
@@ -1115,7 +670,6 @@ async function sendMessage() {
 
     if (diagnosisDelivered) {
       setTimeout(showLeadCapture, 600);
-      setTimeout(showBookCallForm, 1200);
       diagnosisDelivered = false;
     }
 
@@ -1155,124 +709,6 @@ setTimeout(() => {
     );
   }
 }, 400);
-
-// ─── FEEDBACK ─────────────────────────────────────────────
-let messageCount = 0;
-
-function addFeedback(msgIndex) {
-  const wrap = document.createElement('div');
-  wrap.className = 'feedback-row';
-  wrap.innerHTML = `
-    <span class="feedback-label">Was this helpful?</span>
-    <button class="feedback-btn" onclick="submitFeedback(this, 'helpful', ${msgIndex})">👍</button>
-    <button class="feedback-btn" onclick="submitFeedback(this, 'not_helpful', ${msgIndex})">👎</button>
-    <span class="feedback-thanks"></span>
-  `;
-  chatWrap.appendChild(wrap);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
-function submitFeedback(btn, rating, msgIndex) {
-  const row = btn.parentElement;
-  if (row.dataset.voted) return;
-  row.dataset.voted = 'true';
-  const btns = row.querySelectorAll('.feedback-btn');
-  btns.forEach(b => b.disabled = true);
-  btn.classList.add(rating === 'helpful' ? 'active-up' : 'active-down');
-  const thanks = row.querySelector('.feedback-thanks');
-  thanks.style.display = 'inline';
-  thanks.textContent = rating === 'helpful' ? 'Glad it helped!' : 'Got it — I'll improve!';
-
-  const msgContent = history[msgIndex] ? history[msgIndex].content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 300) : '';
-  logToSheet({
-    name: '[FEEDBACK]',
-    email: rating,
-    brandType: sessionMeta.brandType || 'unknown',
-    problemCategory: sessionMeta.problemCategory || '',
-    diagnosisSummary: msgContent,
-    ctaClicked: `feedback-${rating}`,
-    transcript: `Response rated: ${rating} | Content: ${msgContent}`
-  });
-}
-
-// ─── BOOKING FORM ──────────────────────────────────────────
-function showBookCallButton() {
-  const btn = document.createElement('button');
-  btn.className = 'book-call-btn';
-  btn.innerHTML = '📞 Book a free strategy call with Hueblend';
-  btn.onclick = showBookingForm;
-  chatWrap.appendChild(btn);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
-function showBookingForm() {
-  const existing = document.getElementById('bookingCard');
-  if (existing) { existing.scrollIntoView({ behavior: 'smooth' }); return; }
-
-  const card = document.createElement('div');
-  card.className = 'booking-card';
-  card.id = 'bookingCard';
-  card.innerHTML = `
-    <div class="booking-title">Book a free strategy call</div>
-    <div class="booking-sub">Tell us a little about yourself and we'll reach out to schedule a call.</div>
-    <div class="booking-fields">
-      <div class="booking-row">
-        <input class="lead-input" id="bookName" placeholder="Your name" type="text" />
-        <input class="lead-input" id="bookEmail" placeholder="Your email" type="email" />
-      </div>
-      <input class="lead-input" id="bookBrand" placeholder="Your brand name" type="text" />
-      <select class="lead-input" id="bookTime" style="cursor:pointer;">
-        <option value="" disabled selected>Best time to call</option>
-        <option>Morning (9am – 12pm)</option>
-        <option>Afternoon (12pm – 4pm)</option>
-        <option>Evening (4pm – 8pm)</option>
-      </select>
-      <textarea class="lead-input" id="bookMessage" placeholder="What do you need help with? (optional)" rows="2" style="resize:none;"></textarea>
-      <button class="booking-submit" id="bookSubmit" onclick="submitBooking()">Request a call →</button>
-    </div>
-    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5;">We'll reach out within 24 hours. Your details are never shared.</p>
-  `;
-  chatWrap.appendChild(card);
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
-async function submitBooking() {
-  const name = document.getElementById('bookName').value.trim();
-  const email = document.getElementById('bookEmail').value.trim();
-  const brand = document.getElementById('bookBrand').value.trim();
-  const time = document.getElementById('bookTime').value;
-  const message = document.getElementById('bookMessage').value.trim();
-
-  if (!name || !email || !email.includes('@')) {
-    document.getElementById('bookEmail').style.borderColor = 'rgba(232,90,90,0.6)';
-    return;
-  }
-
-  const btn = document.getElementById('bookSubmit');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-
-  await logToSheet({
-    name,
-    email,
-    brandType: brand || sessionMeta.brandType || 'unknown',
-    problemCategory: '[BOOKING REQUEST]',
-    diagnosisSummary: message || 'No message',
-    ctaClicked: `best-time: ${time}`,
-    transcript: `BOOKING REQUEST\nName: ${name}\nEmail: ${email}\nBrand: ${brand}\nTime: ${time}\nMessage: ${message}`
-  });
-
-  saveUserMemory({ name, email });
-
-  document.getElementById('bookingCard').innerHTML = `
-    <div class="lead-success">
-      <div class="lead-success-dot"></div>
-      <span>Request received! We'll reach out within 24 hours.</span>
-    </div>
-  `;
-  chatWrap.scrollTop = chatWrap.scrollHeight;
-}
-
 </script>
 </body>
 </html>
