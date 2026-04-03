@@ -540,7 +540,24 @@ autoSaveConversation();
       const tx = history.map(m => `[${m.role.toUpperCase()}]: ${m.content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()}`).join('\n\n');
       saveDiagnosis(meta, tx);
     }
-      function autoSaveConversation() {
+ 
+    removeTyping();
+    history.push({ role: 'assistant', content: reply });
+    const isFirst = history.length <= 2;
+    const qr = isFirst ? ['Fashion brand, getting views but no sales', 'Beauty D2C, running ads but low ROI', 'Lifestyle brand, growing followers but zero revenue'] : [];
+    addMessage('ai', reply, qr);
+    if (diagnosisDelivered) {
+      setTimeout(showLeadCapture, 600);
+      setTimeout(showBookCallButton, 1200);
+      diagnosisDelivered = false;
+    }
+  } catch(err) {
+    removeTyping();
+    addMessage('ai', 'Something went wrong connecting to the advisor. Please refresh and try again.');
+  }
+  isTyping = false; sendBtn.disabled = false; msgInput.focus();
+}
+function autoSaveConversation() {
   const transcript = history.map(m =>
     '[' + m.role.toUpperCase() + ']: ' +
     m.content.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
@@ -558,23 +575,6 @@ autoSaveConversation();
     transcript: transcript
   });
 }
-    removeTyping();
-    history.push({ role: 'assistant', content: reply });
-    const isFirst = history.length <= 2;
-    const qr = isFirst ? ['Fashion brand, getting views but no sales', 'Beauty D2C, running ads but low ROI', 'Lifestyle brand, growing followers but zero revenue'] : [];
-    addMessage('ai', reply, qr);
-    if (diagnosisDelivered) {
-      setTimeout(showLeadCapture, 600);
-      setTimeout(showBookCallButton, 1200);
-      diagnosisDelivered = false;
-    }
-  } catch(err) {
-    removeTyping();
-    addMessage('ai', 'Something went wrong connecting to the advisor. Please refresh and try again.');
-  }
-  isTyping = false; sendBtn.disabled = false; msgInput.focus();
-}
-
 setTimeout(() => {
   const mem = getUserMemory();
   saveUserMemory({});
