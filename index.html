@@ -25,7 +25,8 @@
   .hero h1 em { font-style: italic; color: var(--accent); }
   .hero p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 440px; margin: 0 auto; }
   .chat-wrap { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 0 16px 140px; display: flex; flex-direction: column; }
-  .message { display: flex; gap: 12px; padding: 10px 0; animation: fadeUp 0.3s ease both; }
+  .message { display: flex; gap: 12px; padding: 10px 0; animation: fadeUp 0.3s ease both; 
+  }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .message.user { flex-direction: row-reverse; }
   .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 2px; }
@@ -294,20 +295,50 @@ function extractMeta(text) {
 function stripMeta(text) {
   return text.replace(/<!--META\{.*?\}META-->/s, '').trim();
 }
-
-function addMessage(role, content, quickReplies = []) {
-  const wrap = document.createElement('div');
-  wrap.className = `message ${role}`;
-  const av = document.createElement('div');
-  av.className = `avatar ${role}`;
-  av.textContent = role === 'ai' ? 'HB' : 'You';
-  const bubble = document.createElement('div');
-  bubble.className = `bubble ${role}`;
-  bubble.innerHTML = content;
-  bubble.querySelectorAll('[data-cta]').forEach(el => {
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', () => { ctaClicked = el.dataset.cta; });
-  });
+ }
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+  .logo { display: flex; align-items: center; }
+  .header-badge { font-size: 11px; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.04em; }
+  .hero { text-align: center; padding: 56px 24px 36px; max-width: 600px; margin: 0 auto; }
+  .hero-tag { display: inline-block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tag-text); background: var(--tag-bg); padding: 5px 14px; border-radius: 99px; margin-bottom: 20px; }
+  .hero h1 { font-family: 'Instrument Serif', serif; font-size: clamp(28px, 5vw, 44px); font-weight: 400; line-height: 1.15; color: var(--text); margin-bottom: 14px; }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 440px; margin: 0 auto; }
+  .chat-wrap { flex: 1; max-width: 720px; width: 100%; margin: 0 auto; padding: 0 16px 140px; display: flex; flex-direction: column; }
+  .message { display: flex; gap: 12px; padding: 10px 0; animation: fadeUp 0.3s ease both; 
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .message.user { flex-direction: row-reverse; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 2px; }
+  .avatar.ai { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); font-size: 10px; letter-spacing: 0.05em; }
+  .avatar.user { background: var(--accent); color: #fff; }
+  .bubble { max-width: 82%; padding: 12px 16px; border-radius: 14px; font-size: 14.5px; line-height: 1.7; }
+  .bubble.ai { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; color: var(--text); }
+  .bubble.user { background: var(--user-bubble); border: 1px solid var(--border-active); border-radius: 14px 4px 14px 14px; color: var(--text); }
+  .bubble strong { color: var(--text); font-weight: 600; }
+  .bubble hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  .bubble .diagnosis-label { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
+  .bubble .action-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .bubble .action-item:last-child { border-bottom: none; }
+  .action-num { width: 22px; height: 22px; border-radius: 50%; background: var(--tag-bg); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+  .bubble .intel-block { display: flex; flex-direction: column; gap: 10px; margin: 10px 0; }
+  .bubble .intel-row { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.65; }
+  .intel-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; }
+  .intel-tag.eq { background: rgba(92,201,138,0.15); color: #5CC98A; }
+  .intel-tag.iq { background: rgba(90,148,232,0.15); color: #5A94E8; }
+  .intel-tag.cq { background: rgba(201,185,154,0.15); color: #C9B99A; }
+  .typing { display: flex; gap: 5px; align-items: center; padding: 8px 0; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.2s ease infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100% { opacity: 0.3; } 40% { opacity: 1; } }
+  .input-bar { position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, var(--bg) 70%, transparent); padding: 16px; }
+  .input-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; align-items: flex-end; background: var(--surface); border: 1px solid var(--border-active); border-radius: 14px; padding: 10px 14px; transition: border-color 0.2s; }
+  .input-inner:focus-within { border-color: rgba(232,132,90,0.4); }
+  textarea { flex: 1; background: none; border: none; outline: none; resize: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.5; max-height: 120px; overflow-y: auto; min-height: 22px; }
+  textarea::placeholder { color: var(--muted); }
   if (role === 'ai') { wrap.appendChild(av); wrap.appendChild(bubble); }
   else { wrap.appendChild(bubble); wrap.appendChild(av); }
   chatWrap.appendChild(wrap);
@@ -322,6 +353,7 @@ function addMessage(role, content, quickReplies = []) {
     });
     chatWrap.appendChild(qrWrap);
   }
+    </script>
   if (role === 'ai' && content.length > 50) {
     const msgIdx = history.length - 1;
     setTimeout(() => addFeedback(msgIdx), 300);
@@ -394,23 +426,26 @@ function showBookingForm() {
   chatWrap.scrollTop = chatWrap.scrollHeight;
 }
 
-async function submitBooking() {
   async function submitBooking() {
   const name = document.getElementById('bookName').value.trim();
   const email = document.getElementById('bookEmail').value.trim();
   const brand = document.getElementById('bookBrand').value.trim();
   const phone = document.getElementById('bookPhone') ? document.getElementById('bookPhone').value.trim() : '';
+   ? document.getElementById('bookPhone').value.trim() 
+    : '';
   const time = document.getElementById('bookTime').value;
   const message = document.getElementById('bookMessage').value.trim();
 
   if (!name) {
-    document.getElementById('bookName').style.borderColor = 'rgba(232,90,90,0.6)';
-    document.getElementById('bookName').placeholder = 'Please enter your name';
+    const el = document.getElementById('bookName');
+    el.style.borderColor = 'rgba(232,90,90,0.6)';
+    el.placeholder = 'Please enter your name';
     return;
   }
   if (!email || !email.includes('@')) {
-    document.getElementById('bookEmail').style.borderColor = 'rgba(232,90,90,0.6)';
-    document.getElementById('bookEmail').placeholder = 'Please enter a valid email';
+       const el = document.getElementById('bookEmail');
+    el.style.borderColor = 'rgba(232,90,90,0.6)';
+    el.placeholder = 'Please enter a valid email';
     return;
   }
 
@@ -426,11 +461,11 @@ async function submitBooking() {
       problemCategory: '[BOOKING REQUEST]',
       diagnosisSummary: message || 'No message provided',
       ctaClicked: 'book-call-header',
-      transcript: 'BOOKING REQUEST\nName: ' + name + '\nEmail: ' + email + '\nWhatsApp: ' + phone + '\nBrand: ' + brand + '\nTime: ' + time + '\nMessage: ' + message
-    });
+    
     saveUserMemory({ name, email });
   } catch(err) {
     console.error('Booking save failed:', err);
+  }
   }
 
   const modal = document.getElementById('bookingModal');
@@ -522,7 +557,8 @@ async function sendMessage() {
   if (history.length === 0) { hero.style.display = 'none'; disclaimer.style.display = 'block'; }
   addMessage('user', text);
   msgInput.value = ''; msgInput.style.height = 'auto';
-  history.push({ role: 'user', content: text });// Auto-save conversation to sheet after every AI response
+  history.push({ role: 'user', content: text });
+  // Auto-save conversation to sheet after every AI response
 autoSaveConversation();
   isTyping = true; sendBtn.disabled = true;
   showTyping();
