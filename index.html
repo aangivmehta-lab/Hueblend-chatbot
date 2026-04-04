@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Why My Brand Isn't Selling — Hueblend</title>
-<link href="https://https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -185,9 +185,10 @@
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-const SHEET_WEBHOOK_URL ='s://script.google.com/macros/https/AKfycbzaCwg0hzNAoeGE4JHWvu_4G-M8Wa9l9cAHmWlohVslPkno1OlN804udDjUj5xZ3Auw1A/exec';
-';
-const ANTHROPIC_API_URL = 'https://small-queen-623c.aangivmehta.workers.dev/';
+// Paste your deployed Cloudflare Worker URL below (see cloudflare-worker.js)
+// It looks like: https://hueblend-proxy.YOUR-NAME.workers.dev
+const WORKER_URL        = 'https://small-queen-623c.aangivmehta.workers.dev/';
+const SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzaCwg0hzNAoeGE4JHWvu_4G-M8Wa9l9cAHmWlohVslPkno1OlN804udDjUj5xZ3Auw1A/exec';
 const MODEL             = 'claude-sonnet-4-20250514';
 
 // ── MEMORY ──────────────────────────────────────────────────
@@ -615,19 +616,66 @@ async function sendMessage() {
   showTyping();
 
   try {
+    if (!WORKER_URL || WORKER_URL.includes('PASTE_')) {
+      removeTyping();
+      addMessage('ai', '⚠️ Worker URL not set. Please follow the setup steps in the README and paste your Cloudflare Worker URL into WORKER_URL at the top of this file.');
+      isTyping = false; sendBtn.disabled = false; msgInput.focus();
+      return;
+    }
+
+    // Build messages array — inject system prompt as first user turn
+    // because Gemini via most CF Workers doesn't have a separate system field
+    const geminiMessages = [
+      { role: 'user', content: 'SYSTEM INSTRUCTIONS:\n' + SYSTEM_PROMPT + '\n\n---\n\nUnderstood. I am the Hueblend Advisor. Ready.' },
+      { role: 'assistant', content: 'Understood. I am the Hueblend Advisor. Ready to help.' },
+      ...history
+    ];
+
     const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:   'claude-sonnet-4-20250514',
+        model:      'gemini-2.0-flash',
         max_tokens: 1000,
-        system:  SYSTEM_PROMPT,
-        messages: history
+        messages:   geminiMessages
       })
     });
 
+    if (!response.ok) {
+      const err = await response.text();
+      console.error('API error:', response.status, err);
+      throw new Error('API returned ' + response.status);
+    }
+
     const data = await response.json();
-    let reply = (data.content || []).map(b => b.text || '').join('') || 'Something went wrong. Try again.';
+    console.log('Raw API response:', JSON.stringify(data).slice(0, 300));
+
+    // Parse reply — handle both Anthropic-style and Gemini-style responses
+    let reply = '';
+
+    // Anthropic style: data.content = [{type:'text', text:'...'}]
+    if (data.content && Array.isArray(data.content)) {
+      reply = data.content.map(b => b.text || '').join('').trim();
+    }
+    // Gemini native style: data.candidates[0].content.parts[0].text
+    else if (data.candidates && data.candidates[0]) {
+      const parts = data.candidates[0]?.content?.parts || [];
+      reply = parts.map(p => p.text || '').join('').trim();
+    }
+    // Some workers wrap it as data.text or data.response
+    else if (typeof data.text === 'string') {
+      reply = data.text.trim();
+    }
+    else if (typeof data.response === 'string') {
+      reply = data.response.trim();
+    }
+    // Last resort — stringify so we can see what came back
+    else {
+      console.error('Unrecognised response shape:', data);
+      reply = '';
+    }
+
+    if (!reply) throw new Error('Empty response — check console for raw response shape');
 
     const meta = extractMeta(reply);
     if (meta) {
@@ -658,7 +706,8 @@ async function sendMessage() {
     }
   } catch(err) {
     removeTyping();
-    addMessage('ai', 'Something went wrong connecting to the advisor. Please refresh and try again.');
+    console.error('sendMessage error:', err);
+    addMessage('ai', 'Having trouble reaching the AI right now. Open browser DevTools (F12 → Console) and look for the raw response log — that will show exactly what your Worker is returning so we can fix the format.');
   }
 
   isTyping = false;
