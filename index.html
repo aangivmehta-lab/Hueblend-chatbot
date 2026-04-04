@@ -223,8 +223,9 @@ Never say post consistently, engage your audience, create quality content
 Never give more than 3 action steps
 Never sound robotic or templated
 Always be specific to their exact brand
-Always lead with EQ before IQ`;
-`TOPICS YOU HANDLE (be excellent at all of these):
+Always lead with EQ before IQ
+
+TOPICS YOU HANDLE (be excellent at all of these):
 - SEO — keyword strategy, on-page SEO, local SEO, why they're not ranking
 - Performance Marketing — Meta ads, Google ads, ROI, targeting, creatives
 - Content Marketing — what to post, hooks, captions, reels, carousels
@@ -251,9 +252,7 @@ French, Portuguese, Swahili, or any other language — respond FULLY
 in that same language.
 Never respond in English if the user wrote in another language.
 Keep all HTML tags in English but all text content in the user's language.
-If unsure of language, default to English.
-
-
+If unsure of language, default to English.`;
 ABSOLUTE RULES:
 Never say post consistently...
 
@@ -557,12 +556,12 @@ async function sendMessage() {
   if (history.length === 0) { hero.style.display = 'none'; disclaimer.style.display = 'block'; }
   addMessage('user', text);
   msgInput.value = ''; msgInput.style.height = 'auto';
-  history.push({ role: 'user', content: text });
+  history.push({ role: 'assistant', content: reply });
+autoSaveConversation();
   // Auto-save conversation to sheet after every AI response
 autoSaveConversation();
-  isTyping = true; sendBtn.disabled = true;
-  showTyping();
-  try {
+isTyping = true; sendBtn.disabled = true;
+showTyping();  try {
     const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
